@@ -1,0 +1,13 @@
+{
+  "name": "magic-carpet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based clean-room remake of Bullfrog's Magic Carpet",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "test": "node tools/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0"
+  }
+}

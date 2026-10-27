@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Magic Carpet</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    #screen { display: block; width: 100vw; height: 100vh; cursor: crosshair; image-rendering: pixelated; }
+    #overlay {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(20,10,40,0.55), rgba(0,0,0,0.85));
+      color: #f3e2b3; font-family: Georgia, serif; cursor: pointer; text-align: center;
+    }
+    #overlay.hidden { display: none; }
+    #overlay h1 { font-size: clamp(32px, 7vw, 72px); margin: 0 0 8px; letter-spacing: 0.06em; color: #ffcf5a; text-shadow: 0 4px 0 #7a1c1c; }
+    #overlay p { margin: 6px 0; font-family: system-ui, sans-serif; font-size: 15px; }
+    #overlay table { margin: 18px auto; font-family: system-ui, sans-serif; font-size: 14px; border-spacing: 14px 4px; }
+    #overlay td:first-child { text-align: right; color: #ffcf5a; font-weight: 600; }
+    #overlay td:last-child { text-align: left; }
+    .go { margin-top: 18px; font-size: 20px !important; animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.45; } }
+  </style>
+</head>
+<body>
+  <canvas id="screen"></canvas>
+  <div id="overlay">
+    <div>
+      <h1>MAGIC CARPET</h1>
+      <p>Possess the world's mana. Grow your castle. Survive the skies.</p>
+      <table>
+        <tr><td>Mouse</td><td>Steer &amp; look (arrow keys also work)</td></tr>
+        <tr><td>W A S D</td><td>Fly / strafe &nbsp;·&nbsp; Shift = faster</td></tr>
+        <tr><td>Space / Q</td><td>Climb / descend</td></tr>
+        <tr><td>Left click / F</td><td>Fireball</td></tr>
+        <tr><td>Right click / R</td><td>Possession (claim mana balls)</td></tr>
+        <tr><td>C</td><td>Raise castle (once) — balloons fetch possessed mana</td></tr>
+        <tr><td>H &nbsp;·&nbsp; M</td><td>Heal &nbsp;·&nbsp; Mute</td></tr>
+        <tr><td>Esc</td><td>Pause</td></tr>
+      </table>
+      <p class="go">Click to fly</p>
+    </div>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
