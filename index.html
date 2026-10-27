@@ -10,7 +10,7 @@
   <style>
     html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
     body { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-    #screen { display: block; width: 100vw; height: 100vh; cursor: crosshair; image-rendering: pixelated; }
+    #screen { display: block; position: fixed; inset: 0; width: 100%; height: 100%; cursor: crosshair; image-rendering: pixelated; }
     #overlay {
       position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
       background: radial-gradient(ellipse at center, rgba(20,10,40,0.55), rgba(0,0,0,0.85));

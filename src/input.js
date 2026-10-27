@@ -40,7 +40,10 @@ export class Input {
   }
 
   lock() {
-    if (this.canvas.requestPointerLock) this.canvas.requestPointerLock();
+    // Optional: some frames and phones refuse it; arrow keys still work.
+    try {
+      this.canvas.requestPointerLock?.()?.catch?.(() => {});
+    } catch {}
   }
 
   // Virtual key presses (used by on-screen touch buttons).
