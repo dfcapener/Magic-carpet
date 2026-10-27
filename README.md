@@ -30,6 +30,10 @@ npm start            # node tools/serve.mjs 8080
 | M | Mute |
 | Esc | Pause |
 
+**On a phone or tablet** the game switches to touch controls automatically:
+drag with your left thumb to fly, drag anywhere else to steer and look, and use
+the on-screen Fire / Claim / Castle / Heal / ▲ ▼ buttons. Landscape plays best.
+
 **Goal:** hold 60% of the world's mana in your castle.
 
 ## Test

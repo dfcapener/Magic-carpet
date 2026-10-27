@@ -8,23 +8,31 @@ export class Renderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.terrain = terrain;
-    this.W = CONFIG.screenW;
     this.H = CONFIG.screenH;
+    // Focal length is fixed by the reference 320-wide view; the framebuffer
+    // width then follows the display's aspect ratio (portrait phones get a
+    // narrower field of view instead of a heavily cropped image).
+    this.F = CONFIG.screenW / 2 / Math.tan(CONFIG.fov / 2);
     this.off = document.createElement('canvas');
-    this.off.width = this.W;
-    this.off.height = this.H;
     this.offCtx = this.off.getContext('2d');
-    this.image = this.offCtx.createImageData(this.W, this.H);
-    this.buf = new Uint32Array(this.image.data.buffer);
-    this.depth = new Float32Array(this.W * this.H);
-    this.ybuf = new Int32Array(this.W);
-    this.tanHalf = Math.tan(CONFIG.fov / 2);
-    this.F = this.W / 2 / this.tanHalf; // focal length in pixels
     this.maxDist = CONFIG.drawDistance;
     this.skyRows = new Uint32Array(this.H);
     const [fr, fg, fb] = CONFIG.sky.horizon;
     this.fogRGB = [fr, fg, fb];
     this.cam = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, roll: 0, sin: 0, cos: 1, horizon: 0 };
+    this.setWidth(CONFIG.screenW);
+  }
+
+  setWidth(W) {
+    if (W === this.W) return;
+    this.W = W;
+    this.off.width = W;
+    this.off.height = this.H;
+    this.image = this.offCtx.createImageData(W, this.H);
+    this.buf = new Uint32Array(this.image.data.buffer);
+    this.depth = new Float32Array(W * this.H);
+    this.ybuf = new Int32Array(W);
+    this.tanHalf = W / 2 / this.F;
   }
 
   resize() {
@@ -35,6 +43,8 @@ export class Renderer {
       this.canvas.width = w;
       this.canvas.height = h;
     }
+    const aspect = w / Math.max(1, h);
+    this.setWidth(Math.max(150, Math.min(400, Math.round((this.H * aspect) / 2) * 2)));
   }
 
   // Project a world point. Returns null when behind the camera / too far.

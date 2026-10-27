@@ -6,6 +6,7 @@ import { Input } from './input.js';
 import { Audio } from './audio.js';
 import { World } from './world.js';
 import { Hud } from './hud.js';
+import { TouchControls, isTouchDevice } from './touch.js';
 
 const canvas = document.getElementById('screen');
 const overlay = document.getElementById('overlay');
@@ -15,28 +16,46 @@ const terrain = new Terrain(seed);
 const renderer = new Renderer(canvas, terrain);
 const input = new Input(canvas);
 const audio = new Audio();
-const world = new World({ terrain, sprites: buildSprites(), audio, input, renderer });
-const hud = new Hud(canvas, terrain);
+const touch = isTouchDevice();
+const world = new World({ terrain, sprites: buildSprites(), audio, input, renderer, touch });
+const hud = new Hud(canvas, terrain, { touch });
 
 let running = false;
 
 function start() {
   audio.start();
-  input.lock();
+  if (touch) {
+    // Best effort: Android browsers allow fullscreen, iOS Safari ignores it.
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  } else {
+    input.lock();
+  }
   overlay.classList.add('hidden');
+  document.body.classList.add('playing');
   running = true;
 }
 
+function pause() {
+  running = false;
+  document.body.classList.remove('playing');
+  overlay.classList.remove('hidden');
+}
+
+if (touch) {
+  document.body.classList.add('touch');
+  new TouchControls(input, canvas, { onPause: pause });
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && running) pause();
+});
+
 overlay.addEventListener('click', start);
 canvas.addEventListener('click', () => {
-  if (running && !input.locked) input.lock();
+  if (running && !touch && !input.locked) input.lock();
 });
 document.addEventListener('pointerlockchange', () => {
   // Leaving pointer lock (Esc) pauses the game.
-  if (!input.locked && running) {
-    running = false;
-    overlay.classList.remove('hidden');
-  }
+  if (!input.locked && running) pause();
 });
 window.addEventListener('resize', () => renderer.resize());
 renderer.resize();
@@ -65,5 +84,5 @@ requestAnimationFrame(frame);
 // Handle for debugging and the headless smoke test.
 window.__game = {
   world, terrain, renderer, input,
-  start: () => { running = true; overlay.classList.add('hidden'); },
+  start: () => { running = true; overlay.classList.add('hidden'); document.body.classList.add('playing'); },
 };

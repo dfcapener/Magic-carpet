@@ -3,8 +3,9 @@ import { CONFIG } from './config.js';
 const MAP_SCALE = 4; // heightmap cells per minimap pixel
 
 export class Hud {
-  constructor(canvas, terrain) {
+  constructor(canvas, terrain, { touch = false } = {}) {
     this.canvas = canvas;
+    this.touch = touch; // touch layout: bars at the top, no keyboard hints
     this.ctx = canvas.getContext('2d');
     this.terrain = terrain;
     const n = terrain.size / MAP_SCALE;
@@ -56,7 +57,7 @@ export class Hud {
 
     // Bars.
     const bw = 220 * u, bh = 14 * u, x0 = 20 * u;
-    let y0 = H - 30 * u - bh * 3;
+    let y0 = this.touch ? 20 * u : H - 30 * u - bh * 3;
     this.bar(ctx, x0, y0, bw, bh, p.health / CONFIG.player.maxHealth, '#c8302a', `Health ${Math.ceil(p.health)}`, u);
     y0 += bh + 8 * u;
     const castleNeed = world.castle ? CONFIG.castleLevels[Math.min(world.castle.level + 1, 4)] : CONFIG.spells.castle.cost;
@@ -67,7 +68,26 @@ export class Hud {
     ctx.fillStyle = '#fff';
     ctx.fillRect(x0 + bw * (CONFIG.goalPercent / 100) - u, y0 - 2 * u, 2 * u, bh + 4 * u);
 
-    // Spell hints.
+    // Spell hints (touch players have labelled buttons instead).
+    if (!this.touch) this.drawHints(ctx, W, H, u, world);
+
+    this.drawMinimap(ctx, W, u, world);
+
+    // Messages.
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${18 * u}px Georgia, serif`;
+    const my = this.touch ? 110 * u : 60 * u;
+    world.messages.forEach((m, i) => {
+      const a = Math.min(1, m.t / 0.6, (m.duration - m.t) / 0.2 + 0.2);
+      ctx.fillStyle = `rgba(0,0,0,${0.5 * a})`;
+      ctx.fillText(m.text, W / 2 + 2 * u, my + i * 26 * u + 2 * u);
+      ctx.fillStyle = `rgba(255,230,160,${a})`;
+      ctx.fillText(m.text, W / 2, my + i * 26 * u);
+    });
+    ctx.textAlign = 'left';
+  }
+
+  drawHints(ctx, W, H, u, world) {
     ctx.font = `${12 * u}px system-ui, sans-serif`;
     ctx.textAlign = 'right';
     ctx.fillStyle = 'rgba(255,245,220,0.85)';
@@ -79,19 +99,6 @@ export class Hud {
       `H  Heal (${S.heal.cost})`,
     ];
     lines.forEach((l, i) => ctx.fillText(l, W - 20 * u, H - 30 * u - (lines.length - 1 - i) * 16 * u));
-
-    this.drawMinimap(ctx, W, u, world);
-
-    // Messages.
-    ctx.textAlign = 'center';
-    ctx.font = `bold ${18 * u}px Georgia, serif`;
-    world.messages.forEach((m, i) => {
-      const a = Math.min(1, m.t / 0.6, (m.duration - m.t) / 0.2 + 0.2);
-      ctx.fillStyle = `rgba(0,0,0,${0.5 * a})`;
-      ctx.fillText(m.text, W / 2 + 2 * u, 60 * u + i * 26 * u + 2 * u);
-      ctx.fillStyle = `rgba(255,230,160,${a})`;
-      ctx.fillText(m.text, W / 2, 60 * u + i * 26 * u);
-    });
     ctx.textAlign = 'left';
   }
 

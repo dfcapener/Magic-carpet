@@ -131,6 +131,49 @@ const fps = await page.evaluate(() => new Promise((resolve) => {
 }));
 console.log('fps (headless, software GL):', fps.toFixed(1));
 
+// Phone: touch-emulated landscape viewport with real touch events.
+const phone = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+const mp = await phone.newPage();
+mp.on('pageerror', (e) => errors.push('[phone] ' + e.message));
+await mp.goto(`http://localhost:${port}/`);
+await mp.waitForFunction(() => window.__game);
+if (!(await mp.evaluate(() => document.body.classList.contains('touch')))) await fail('touch layout not enabled on phone');
+if (outDir) await mp.screenshot({ path: `${outDir}/phone-title.png` });
+await mp.tap('#overlay');
+const cdp = await phone.newCDPSession(mp);
+const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
+const p0 = await mp.evaluate(() => { const p = window.__game.world.player; return { x: p.x, y: p.y, yaw: p.yaw }; });
+// Left thumb pushes the stick up (fly forward) while the right thumb drags to turn.
+await touch('touchStart', [{ x: 150, y: 300, id: 1 }, { x: 500, y: 200, id: 2 }]);
+for (let i = 1; i <= 10; i++) {
+  await touch('touchMove', [{ x: 150, y: 300 - i * 6, id: 1 }, { x: 500 + i * 8, y: 200, id: 2 }]);
+  await mp.waitForTimeout(40);
+}
+await mp.waitForTimeout(800);
+await touch('touchEnd', []);
+const p1 = await mp.evaluate(() => { const g = window.__game, p = g.world.player; return { x: p.x, y: p.y, yaw: p.yaw, joy: g.input.joyY }; });
+const moved = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+if (moved < 5) await fail(`stick did not move the carpet (moved ${moved})`);
+if (Math.abs(p1.yaw - p0.yaw) < 0.1) await fail('look drag did not turn the carpet');
+if (p1.joy !== 0) await fail('stick did not reset on release');
+const shots = await mp.evaluate(() => window.__game.world.mana);
+await mp.tap('.tbtn.fire');
+await mp.waitForTimeout(200);
+if (!((await mp.evaluate(() => window.__game.world.mana)) < shots)) await fail('fire button did not cast');
+console.log('phone controls ok: moved', moved.toFixed(1), 'turned', (p1.yaw - p0.yaw).toFixed(2));
+if (outDir) await mp.screenshot({ path: `${outDir}/phone.png` });
+// Portrait (fresh context: the tap above may have entered fullscreen).
+const tall = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+const pp = await tall.newPage();
+pp.on('pageerror', (e) => errors.push('[portrait] ' + e.message));
+await pp.goto(`http://localhost:${port}/`);
+await pp.waitForFunction(() => window.__game);
+await pp.evaluate(() => window.__game.start());
+await pp.waitForTimeout(500);
+const fbw = await pp.evaluate(() => window.__game.renderer.W);
+if (fbw >= 200) await fail(`portrait framebuffer should be narrow, got ${fbw}`);
+if (outDir) await pp.screenshot({ path: `${outDir}/phone-portrait.png` });
+
 if (errors.length) await fail('page errors:\n' + errors.join('\n'));
 console.log('PASS');
 await browser.close();

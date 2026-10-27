@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
   <title>Magic Carpet</title>
   <style>
     html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    body { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
     #screen { display: block; width: 100vw; height: 100vh; cursor: crosshair; image-rendering: pixelated; }
     #overlay {
       position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -20,6 +24,38 @@
     #overlay td:last-child { text-align: left; }
     .go { margin-top: 18px; font-size: 20px !important; animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse { 50% { opacity: 0.45; } }
+    #overlay > div { padding: 16px; max-height: 100%; overflow: auto; box-sizing: border-box; }
+    .touch-only { display: none; }
+    body.touch .touch-only { display: table; }
+    body.touch p.touch-only { display: block; }
+    body.touch span.touch-only { display: inline; }
+    body.touch .desk-only { display: none; }
+
+    /* On-screen touch controls */
+    #touch { display: none; }
+    body.touch.playing #touch { display: block; }
+    .stick-base {
+      position: fixed; width: 110px; height: 110px; margin: -55px 0 0 -55px; border-radius: 50%;
+      border: 2px solid rgba(255,230,160,0.5); background: rgba(0,0,0,0.25); display: none; pointer-events: none;
+    }
+    .stick-base.on { display: block; }
+    .stick-knob {
+      position: absolute; left: 30px; top: 30px; width: 50px; height: 50px; border-radius: 50%;
+      background: rgba(255,207,90,0.7);
+    }
+    .tbtn {
+      position: fixed; border-radius: 50%; border: 2px solid rgba(255,230,160,0.7);
+      background: rgba(60,20,20,0.45); color: #ffe7a8; font: 600 14px system-ui, sans-serif;
+      touch-action: none; padding: 0;
+    }
+    .tbtn.on { background: rgba(255,170,40,0.6); }
+    .tbtn.fire    { width: 84px; height: 84px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); background: rgba(160,40,20,0.55); }
+    .tbtn.possess { width: 66px; height: 66px; right: calc(120px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); background: rgba(160,130,20,0.5); }
+    .tbtn.up      { width: 52px; height: 52px; right: calc(34px + env(safe-area-inset-right)); bottom: calc(176px + env(safe-area-inset-bottom)); }
+    .tbtn.down    { width: 52px; height: 52px; right: calc(34px + env(safe-area-inset-right)); bottom: calc(118px + env(safe-area-inset-bottom)); }
+    .tbtn.castle  { width: 58px; height: 58px; right: calc(126px + env(safe-area-inset-right)); bottom: calc(100px + env(safe-area-inset-bottom)); font-size: 12px; }
+    .tbtn.heal    { width: 52px; height: 52px; right: calc(104px + env(safe-area-inset-right)); bottom: calc(168px + env(safe-area-inset-bottom)); font-size: 12px; }
+    .tbtn.pause   { width: 40px; height: 40px; left: 50%; margin-left: -20px; top: calc(10px + env(safe-area-inset-top)); font-size: 12px; }
   </style>
 </head>
 <body>
@@ -28,7 +64,7 @@
     <div>
       <h1>MAGIC CARPET</h1>
       <p>Possess the world's mana. Grow your castle. Survive the skies.</p>
-      <table>
+      <table class="desk-only">
         <tr><td>Mouse</td><td>Steer &amp; look (arrow keys also work)</td></tr>
         <tr><td>W A S D</td><td>Fly / strafe &nbsp;·&nbsp; Shift = faster</td></tr>
         <tr><td>Space / Q</td><td>Climb / descend</td></tr>
@@ -38,7 +74,15 @@
         <tr><td>H &nbsp;·&nbsp; M</td><td>Heal &nbsp;·&nbsp; Mute</td></tr>
         <tr><td>Esc</td><td>Pause</td></tr>
       </table>
-      <p class="go">Click to fly</p>
+      <table class="touch-only">
+        <tr><td>Left thumb</td><td>Drag to fly</td></tr>
+        <tr><td>Right thumb</td><td>Drag to steer &amp; look</td></tr>
+        <tr><td>Fire / Claim</td><td>Fireball / possess mana</td></tr>
+        <tr><td>▲ ▼</td><td>Climb / descend</td></tr>
+        <tr><td>Castle</td><td>Raise your castle (once)</td></tr>
+      </table>
+      <p class="touch-only">Best played in landscape.</p>
+      <p class="go"><span class="desk-only">Click</span><span class="touch-only">Tap</span> to fly</p>
     </div>
   </div>
   <script type="module" src="src/main.js"></script>

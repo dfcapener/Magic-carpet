@@ -41,8 +41,9 @@ export class Player {
     this.pitch = Math.max(-120, Math.min(80, this.pitch));
 
     // Move.
-    const fwd = (input.down('KeyW') ? 1 : 0) - (input.down('KeyS') ? 1 : 0);
-    const strafe = (input.down('KeyD') ? 1 : 0) - (input.down('KeyA') ? 1 : 0);
+    const clamp1 = (v) => Math.max(-1, Math.min(1, v));
+    const fwd = clamp1((input.down('KeyW') ? 1 : 0) - (input.down('KeyS') ? 1 : 0) - input.joyY);
+    const strafe = clamp1((input.down('KeyD') ? 1 : 0) - (input.down('KeyA') ? 1 : 0) + input.joyX);
     const cos = Math.cos(this.yaw), sin = Math.sin(this.yaw);
     const boost = input.down('ShiftLeft') ? 1.6 : 1;
     this.vx += (cos * fwd - sin * strafe * 0.8) * P.accel * boost * dt;
@@ -72,8 +73,10 @@ export class Player {
     if (this.health < P.maxHealth) this.health = Math.min(P.maxHealth, this.health + P.healthRegen * dt);
 
     // Spells.
-    if (input.buttons[0] || input.down('KeyF')) this.tryCast(world, 'fireball');
-    if (input.buttons[2] || input.down('KeyR')) this.tryCast(world, 'possession');
+    // wasPressed catches taps that press and release within a single frame.
+    const held = (code) => input.down(code) || input.wasPressed(code);
+    if (input.buttons[0] || held('KeyF')) this.tryCast(world, 'fireball');
+    if (input.buttons[2] || held('KeyR')) this.tryCast(world, 'possession');
     if (input.wasPressed('KeyC')) world.castCastle();
     if (input.wasPressed('KeyH')) world.castHeal();
   }

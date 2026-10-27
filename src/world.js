@@ -10,7 +10,7 @@ const PARTICLES = {
 };
 
 export class World {
-  constructor({ terrain, sprites, audio, input, renderer }) {
+  constructor({ terrain, sprites, audio, input, renderer, touch = false }) {
     Object.assign(this, { terrain, sprites, audio, input, renderer });
     this.rng = mulberry32(CONFIG.seed + 1);
     this.time = 0;
@@ -34,8 +34,8 @@ export class World {
     }
     for (let i = 0; i < CONFIG.vultures; i++) this.spawnVulture();
 
-    this.message('Press C to raise your castle', 6);
-    this.message('Right-click mana to possess it', 6);
+    this.message(touch ? 'Tap Castle to raise your castle' : 'Press C to raise your castle', 6);
+    this.message(touch ? 'Aim at mana and tap Claim' : 'Right-click mana to possess it', 6);
   }
 
   // Random land cell (above the beach) satisfying pred.

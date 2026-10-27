@@ -9,6 +9,8 @@ export class Input {
     this.mouseDX = 0;
     this.mouseDY = 0;
     this.locked = false;
+    this.joyX = 0; // analog stick from touch controls, -1..1
+    this.joyY = 0;
 
     window.addEventListener('keydown', (e) => {
       if (!this.keys.has(e.code)) this.pressed.add(e.code);
@@ -39,6 +41,16 @@ export class Input {
 
   lock() {
     if (this.canvas.requestPointerLock) this.canvas.requestPointerLock();
+  }
+
+  // Virtual key presses (used by on-screen touch buttons).
+  press(code) {
+    if (!this.keys.has(code)) this.pressed.add(code);
+    this.keys.add(code);
+  }
+
+  release(code) {
+    this.keys.delete(code);
   }
 
   down(code) {
